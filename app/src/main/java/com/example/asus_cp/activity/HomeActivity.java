@@ -1,0 +1,117 @@
+package com.example.asus_cp.activity;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTabHost;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TabHost;
+import android.widget.TabWidget;
+import android.widget.TextView;
+
+import com.example.asus_cp.iweibo.R;
+import com.example.contants.ActivityConstant;
+import com.example.fragment.AtFragment;
+import com.example.fragment.HomeFragment;
+import com.example.fragment.MeFragment;
+import com.example.fragment.MsgFragment;
+import com.example.fragment.QueryFragment;
+import com.example.modle.UserInfo;
+import com.example.wbinterfase.IWeiBoActivity;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
+/**
+ * Created by asus-cp on 2016-03-23.
+ */
+public class HomeActivity extends FragmentActivity implements IWeiBoActivity{
+    private LayoutInflater inflater;
+    private UserInfo userInfo;//登录用户的用户信息
+    @Bind(android.R.id.tabhost)
+    FragmentTabHost tabhost;
+    @Bind(android.R.id.tabcontent)
+    FrameLayout tabcontent;
+    @Bind(android.R.id.tabs)
+    TabWidget tabs;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.home_layout);
+        ButterKnife.bind(this);
+        init();
+    }
+
+    @Override
+    public void init() {
+        Intent intent=getIntent();
+        Bundle bundle=intent.getExtras();
+        userInfo=bundle.getParcelable(ActivityConstant.USER_INFO_KEY);//获取登录用户的用户信息
+        inflater=LayoutInflater.from(this);
+        tabhost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);//最后一个布局的设置要非常小心，不要设置成了tabhost
+        tabhost.getTabWidget().setDividerDrawable(null);//不要分割线
+        TabHost.TabSpec homeTabSpec=tabhost.newTabSpec(ActivityConstant.HOME_TAG);
+        View homeView=getView(R.drawable.icon_home, ActivityConstant.HOME_VALUE);
+        homeTabSpec.setIndicator(homeView);
+        tabhost.addTab(homeTabSpec, HomeFragment.class, null);
+        tabhost.getTabWidget().getChildAt(0).setBackgroundResource(R.drawable.btn_bg);
+
+
+        TabHost.TabSpec msgTabSpec=tabhost.newTabSpec(ActivityConstant.MSG_TAG);
+        View msgView=getView(R.drawable.icon_meassage, ActivityConstant.MSG_VALUE);
+        msgTabSpec.setIndicator(msgView);
+        tabhost.addTab(msgTabSpec, MsgFragment.class, null);
+        tabhost.getTabWidget().getChildAt(1).setBackgroundResource(R.drawable.btn_bg);
+
+
+        TabHost.TabSpec atTabSpec=tabhost.newTabSpec(ActivityConstant.SCQURE_TAG);
+        View atView=getView(R.drawable.icon_square,ActivityConstant.SCQURE_VALUE);
+        atTabSpec.setIndicator(atView);
+        tabhost.addTab(atTabSpec, AtFragment.class, null);
+        tabhost.getTabWidget().getChildAt(2).setBackgroundResource(R.drawable.btn_bg);
+
+
+        TabHost.TabSpec meTabSpec=tabhost.newTabSpec(ActivityConstant.ME_TAG);
+        View meView=getView(R.drawable.icon_selfinfo,ActivityConstant.ME_VALUE);
+        meTabSpec.setIndicator(meView);
+        tabhost.addTab(meTabSpec, MeFragment.class, null);
+        tabhost.getTabWidget().getChildAt(3).setBackgroundResource(R.drawable.btn_bg);
+
+
+        TabHost.TabSpec queryTabSpec=tabhost.newTabSpec(ActivityConstant.MORE_TAG);
+        View queryView=getView(R.drawable.icon_more,ActivityConstant.MORE_VALUE);
+        queryTabSpec.setIndicator(queryView);
+        tabhost.addTab(queryTabSpec, QueryFragment.class, null);
+        tabhost.getTabWidget().getChildAt(4).setBackgroundResource(R.drawable.btn_bg);
+
+
+    }
+
+    /**
+     * 返回小部件view的方法
+     * @param
+     */
+    public View getView(int resouceId,String text){
+        View view=inflater.inflate(R.layout.tab_widget_item_layout,null);
+        ImageView imgTabWidget= (ImageView) view.findViewById(R.id.img_tab_widget);
+        TextView textTabWidget= (TextView) view.findViewById(R.id.text_tab_widget);
+        imgTabWidget.setImageResource(resouceId);
+        textTabWidget.setText(text);
+        return view;
+    }
+
+    @Override
+    public void refresh(Object... params) {
+
+    }
+    /**
+     * 获取登录用户信息
+     */
+    public UserInfo getUserInfo(){
+        return userInfo;
+    }
+}

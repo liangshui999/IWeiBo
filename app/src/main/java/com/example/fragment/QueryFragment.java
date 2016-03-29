@@ -1,0 +1,20 @@
+package com.example.fragment;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.example.asus_cp.iweibo.R;
+
+/**
+ * Created by asus-cp on 2016-03-23.
+ */
+public class QueryFragment extends android.support.v4.app.Fragment {
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.query_fragment_layout,null);
+    }
+}

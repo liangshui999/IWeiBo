@@ -1,0 +1,140 @@
+package com.example.daoiml;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import com.example.contants.DBConstant;
+import com.example.dao.IUserInfoService;
+import com.example.db.DBCreateHelper;
+import com.example.db.DBOperateHelper;
+import com.example.db.HandleCursor;
+import com.example.modle.UserInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by asus-cp on 2016-03-21.
+ */
+public class UserInfoService implements IUserInfoService {
+    private String tag="UserInfoService";
+    private DBOperateHelper helper;
+    public UserInfoService() {
+        helper=DBOperateHelper.getDBOperateHelper();
+    }
+
+    /**
+     * 向用户信息表中插入一条数据
+     * @param userInfo
+     */
+    @Override
+    public void insert(UserInfo userInfo) {
+        SQLiteDatabase db= null;
+        try{
+            db= DBCreateHelper.getDBCreateHelper().getWritableDatabase();
+            ContentValues contentValues=new ContentValues();
+            contentValues.put(DBConstant.UserTable.USER_ID,userInfo.getUserId());
+            contentValues.put(DBConstant.UserTable.USER_NAME,userInfo.getUserName());
+            contentValues.put(DBConstant.UserTable.USER_IMAGE,userInfo.getUserImage());
+            contentValues.put(DBConstant.UserTable.ACCESS_TOKEN,userInfo.getAccessToken());
+            contentValues.put(DBConstant.UserTable.REFRESH_TOKEN,userInfo.getRefreshToken());
+            contentValues.put(DBConstant.UserTable.AUTH_TIME,userInfo.getAuthTime()+"");
+            contentValues.put(DBConstant.UserTable.EXPIREIN,userInfo.getExpiresIn()+"");
+            db.insert(DBConstant.UserTable.USER_TABLE,null,contentValues);
+        }catch (Exception e){
+            Log.d(tag,e.toString());
+        }finally {
+            db.close();
+        }
+
+    }
+
+    /**
+     * 根据userId更新用户信息
+     * @param userId
+     * @param userInfo
+     */
+    @Override
+    public void update(String userId, UserInfo userInfo) {
+        String sql=DBConstant.UserTable.UPDATE_USER;
+        String[]params=new String[]{userInfo.getUserName(),
+        userInfo.getAccessToken(),userInfo.getRefreshToken(),userInfo.getAuthTime()+"",
+                userInfo.getExpiresIn()+"",userId};
+        Log.d(tag,userInfo.getUserName());
+        Log.d(tag,userInfo.getExpiresIn()+"");
+        helper.zsg(sql,params);
+    }
+
+    /**
+     * 根据userId删除用户
+     * @param userId
+     */
+    @Override
+    public void delete(String userId) {
+        String sql=DBConstant.UserTable.DELETE_USER;
+        String[] params=new String[]{userId};
+        helper.zsg(sql,params);
+    }
+
+    /**
+     * 根据userId查询用户信息
+     * @param userId
+     * @return
+     */
+    @Override
+    public UserInfo query(final String userId) {
+        String sql=DBConstant.UserTable.QUERY_USER;
+        String[] params=new String[]{userId};
+        UserInfo userInfo= (UserInfo) helper.query(sql, params, new HandleCursor() {
+            @Override
+            public Object handleCursor(Cursor cursor) {
+                UserInfo userInfo1 = null;
+                if (cursor.moveToNext()) {
+                    String usetName = cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.USER_NAME));
+                    byte[] usetImage = cursor.getBlob(cursor.getColumnIndex(DBConstant.UserTable.USER_IMAGE));
+                    String accessToken = cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.ACCESS_TOKEN));
+                    String refreshToken = cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.REFRESH_TOKEN));
+                    long authTime = Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.AUTH_TIME)));
+                    long expiresIn =Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.EXPIREIN)));
+                    userInfo1 = new UserInfo(userId, usetName, usetImage, accessToken, refreshToken, authTime, expiresIn);
+                }
+                return userInfo1;
+            }
+        });
+        return userInfo;
+
+    }
+
+    /**
+     * 查询所有用户信息
+     * @return
+     */
+    @Override
+    public List<UserInfo> query() {
+        String sql=DBConstant.UserTable.QUERY_USERS;
+        List<UserInfo> userInfos= (List<UserInfo>) helper.query(sql, null, new HandleCursor() {
+            @Override
+            public Object handleCursor(Cursor cursor) {
+                List<UserInfo> infos = new ArrayList<UserInfo>();
+                UserInfo userInfo = null;
+                while (cursor.moveToNext()) {
+                    String userId = cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.USER_ID));
+                    String usetName = cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.USER_NAME));
+                    byte[] usetImage = cursor.getBlob(cursor.getColumnIndex(DBConstant.UserTable.USER_IMAGE));
+                    String accessToken = cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.ACCESS_TOKEN));
+                    String refreshToken = cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.REFRESH_TOKEN));
+                    long authTime = Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.AUTH_TIME)));
+                    long expiresIn =Long.parseLong(cursor.getString(cursor.getColumnIndex(DBConstant.UserTable.EXPIREIN)));
+                    userInfo = new UserInfo(userId, usetName, usetImage, accessToken, refreshToken, authTime, expiresIn);
+                    infos.add(userInfo);
+                }
+                return infos;
+
+            }
+        });
+        return userInfos;
+
+    }
+}
