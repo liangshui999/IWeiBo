@@ -23,4 +23,8 @@
     <string name="zhuanfa">转发</string>
     <string name="comments">评论</string>
     <string name="like">点赞</string>
+
+    <array name="myemotion">
+
+    </array>
 </resources>

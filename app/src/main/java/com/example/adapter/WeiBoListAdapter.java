@@ -2,6 +2,7 @@ package com.example.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,9 @@ import android.widget.TextView;
 
 import com.example.Util.ImageAsynLoader;
 import com.example.Util.MyDateUtil;
+import com.example.Util.MyStringUtil;
 import com.example.asus_cp.iweibo.R;
+import com.sina.weibo.sdk.openapi.legacy.StatusesAPI;
 import com.sina.weibo.sdk.openapi.models.Status;
 
 import java.util.List;
@@ -28,10 +31,13 @@ public class WeiBoListAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private ListView listView;
     private ImageAsynLoader loader;
+    private MyStringUtil myStringUtil;
+    private StatusesAPI statusesAPI;
 
-    public WeiBoListAdapter(Context context, List<Status> statuses) {
+    public WeiBoListAdapter(Context context, List<Status> statuses,StatusesAPI statusesAPI) {
         this.context = context;
         this.statuses = statuses;
+        this.statusesAPI=statusesAPI;
         for(int i=0;i<statuses.size();i++){
             statuses.get(i).text=statuses.get(i).text+"........."+i;
             statuses.get(i).user.screen_name=statuses.get(i).user.screen_name+"....."+i;
@@ -39,6 +45,7 @@ public class WeiBoListAdapter extends BaseAdapter {
         }
         inflater = LayoutInflater.from(context);
         loader=new ImageAsynLoader();
+        myStringUtil=new MyStringUtil(statusesAPI);
 
     }
 
@@ -111,14 +118,18 @@ public class WeiBoListAdapter extends BaseAdapter {
         viewHolder.textListviewUserName.setText(status.user.screen_name);
         //判断是否是加v用户
         if(status.user.verified){
+            viewHolder.imgListviewVCertification.setVisibility(View.VISIBLE);
             viewHolder.imgListviewVCertification.setImageResource(R.mipmap.v);
             viewHolder.textListviewUserName.setTextColor(context.getResources().getColor(R.color.userName));
+        }else{
+            viewHolder.imgListviewVCertification.setVisibility(View.GONE);
         }
         viewHolder.textReleaseTime.setText(MyDateUtil.getFormatString(MyDateUtil.transformStringToDate(status.created_at)));
         //Log.d(tag, "发布时间=" + status.created_at);
         viewHolder.textFromWhere.setText(getSubString(status.source));
 
-        viewHolder.textWeiboContent.setText(status.text);//问题居然出在这句话上面
+        SpannableString content=myStringUtil.setHuiZong(status.text);
+        viewHolder.textWeiboContent.setText(content);//问题居然出在这句话上面
         //有配图
         if(status.thumbnail_pic!=null && !status.thumbnail_pic.equals("")){ //注意所谓的不返回，其实返回的是""，
             viewHolder.imgContentPictrue.setVisibility(View.VISIBLE);

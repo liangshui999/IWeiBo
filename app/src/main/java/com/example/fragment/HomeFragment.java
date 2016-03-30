@@ -18,7 +18,7 @@ import com.example.wbinterfase.IWeiBoActivity;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.exception.WeiboException;
 import com.sina.weibo.sdk.net.RequestListener;
-import com.sina.weibo.sdk.openapi.StatusesAPI;
+import com.sina.weibo.sdk.openapi.legacy.StatusesAPI;
 import com.sina.weibo.sdk.openapi.models.Status;
 
 import org.json.JSONArray;
@@ -64,6 +64,7 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
         Oauth2AccessToken oauth2AccessToken=new Oauth2AccessToken(userInfo.getAccessToken(),
                 userInfo.getExpiresIn()+"");
         statusesAPI=new StatusesAPI(getActivity(), AuthConstants.APP_KEY,oauth2AccessToken);
+
         statusesAPI.friendsTimeline(0, 0, 50, 1, false, 0, false, new RequestListener() {
             @Override
             public void onComplete(String s) {
@@ -76,7 +77,7 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
                         Log.d(tag, " status=" + status.user.screen_name+status.text);
                         statuses.add(status);
                     }
-                    adapter = new WeiBoListAdapter(getActivity(), statuses);
+                    adapter = new WeiBoListAdapter(getActivity(), statuses,statusesAPI);
                     listView.setAdapter(adapter);//得数据返回来之后才设置adapter，而不是在oncreateView()里面设置
                     Log.d(tag, "size=" + statuses.size());
                 } catch (JSONException e) {
