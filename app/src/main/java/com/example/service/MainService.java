@@ -55,6 +55,7 @@ public class MainService extends Service implements Runnable {
                     String name=bundle.getString(ActivityConstant.URL);
                     WBAuthActivity activity= (WBAuthActivity) getActivityByName("com.example.asus_cp.activity.WBAuthActivity");
                     activity.refresh(name);
+                    activities.remove(activity);
                     break;
                 case Task.GET_LOGIN_USER_INFO://获取用户名和头像并刷新ui，并将获取到的用户信息存到数据库
                     Bundle bundle1=msg.getData();
@@ -76,6 +77,7 @@ public class MainService extends Service implements Runnable {
                     LoginActivity loginActivity= (LoginActivity) getActivityByName("com.example.asus_cp." +
                             "activity.LoginActivity");
                     loginActivity.refresh(Task.GET_LOGIN_USER_INFO);
+                    activities.remove(loginActivity);//从集合中移除，避免内存泄漏
             }
         }
     }
@@ -231,6 +233,8 @@ public class MainService extends Service implements Runnable {
         }
         return  mActivity;
     }
+
+
 
 
 

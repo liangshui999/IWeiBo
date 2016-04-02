@@ -53,7 +53,7 @@ public class MyDateUtil {
                 yesterday.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         yesterday.add(Calendar.DAY_OF_MONTH,-1);//在今天的基础上减去一天，就是昨天,也就是设置成昨天的0点0分0秒
         //如果是今天发的
-        if(calendar.after(today)){
+        if(calendar!=null&&calendar.after(today)){
             int xsc=currentTime.get(Calendar.HOUR_OF_DAY)-calendar.get(Calendar.HOUR_OF_DAY);
             if(xsc<1){
                 int fzc=currentTime.get(Calendar.MINUTE)-calendar.get(Calendar.MINUTE);
@@ -69,7 +69,7 @@ public class MyDateUtil {
                 return xsc+"小时前";
             }
 
-        }else if(calendar.before(today)&&calendar.after(yesterday)){
+        }else if(calendar!=null&&calendar.before(today)&&calendar.after(yesterday)){
             String pateem="HH:mm";
             SimpleDateFormat simpleDateFormat=new SimpleDateFormat(pateem);
             return "昨天"+simpleDateFormat.format(calendar.getTime());

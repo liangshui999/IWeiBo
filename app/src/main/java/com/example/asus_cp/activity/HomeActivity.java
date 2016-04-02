@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -29,6 +30,8 @@ import butterknife.ButterKnife;
  * Created by asus-cp on 2016-03-23.
  */
 public class HomeActivity extends FragmentActivity implements IWeiBoActivity{
+    private int screenWidth;//屏幕宽
+    private int screenHeight;//屏幕高
     private LayoutInflater inflater;
     private UserInfo userInfo;//登录用户的用户信息
     @Bind(android.R.id.tabhost)
@@ -44,6 +47,15 @@ public class HomeActivity extends FragmentActivity implements IWeiBoActivity{
         setContentView(R.layout.home_layout);
         ButterKnife.bind(this);
         init();
+
+    }
+
+    public int getScreenHeight() {
+        return screenHeight;
+    }
+
+    public int getScreenWidth() {
+        return screenWidth;
     }
 
     @Override
@@ -88,7 +100,11 @@ public class HomeActivity extends FragmentActivity implements IWeiBoActivity{
         tabhost.addTab(queryTabSpec, QueryFragment.class, null);
         tabhost.getTabWidget().getChildAt(4).setBackgroundResource(R.drawable.btn_bg);
 
-
+        //获取屏幕宽高
+        DisplayMetrics metric = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metric);
+        screenWidth = metric.widthPixels;     // 屏幕宽度（像素）
+        screenHeight = metric.heightPixels;   // 屏幕高度（像素）
     }
 
     /**

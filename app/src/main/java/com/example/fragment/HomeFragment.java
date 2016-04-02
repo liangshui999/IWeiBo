@@ -41,12 +41,13 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        init();
+
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        init();
         View v=inflater.inflate(R.layout.home_fragment_layout,null);
         listView= (ListView) v.findViewById(R.id.listview_home);
 
@@ -57,6 +58,10 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
     public void init() {
         statuses=new ArrayList<Status>();
         HomeActivity homeActivity= (HomeActivity) getActivity();//获取到和本碎片相关联的活动
+        //获取屏幕宽和高
+        final int screenWidth=homeActivity.getScreenWidth();
+        final int screenHeight=homeActivity.getScreenHeight();
+
         UserInfo userInfo=homeActivity.getUserInfo();//获取到登录用户的信息
         Log.d(tag,"userName="+userInfo.getUserName());
         Log.d(tag,"AccessToken="+userInfo.getAccessToken());
@@ -65,7 +70,7 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
                 userInfo.getExpiresIn()+"");
         statusesAPI=new StatusesAPI(getActivity(), AuthConstants.APP_KEY,oauth2AccessToken);
 
-        statusesAPI.friendsTimeline(0, 0, 50, 1, false, 0, false, new RequestListener() {
+        statusesAPI.friendsTimeline(0, 0, 20, 1, false, 0, false, new RequestListener() {
             @Override
             public void onComplete(String s) {
                 try {
@@ -77,7 +82,7 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
                         Log.d(tag, " status=" + status.user.screen_name+status.text);
                         statuses.add(status);
                     }
-                    adapter = new WeiBoListAdapter(getActivity(), statuses,statusesAPI);
+                    adapter = new WeiBoListAdapter(getActivity(), statuses,statusesAPI,screenWidth,screenHeight);
                     listView.setAdapter(adapter);//得数据返回来之后才设置adapter，而不是在oncreateView()里面设置
                     Log.d(tag, "size=" + statuses.size());
                 } catch (JSONException e) {

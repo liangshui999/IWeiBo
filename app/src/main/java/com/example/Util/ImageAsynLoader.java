@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.LruCache;
 
 import com.example.contants.ActivityConstant;
@@ -25,6 +26,7 @@ import java.util.concurrent.Executors;
  * Created by asus-cp on 2016-03-27.
  */
 public class ImageAsynLoader {
+    private static String tag="ImageAsynLoader";
     public static String URL_KEY="urlkey";
     public static String BITMAP_KEY="bitmapkey";
     private ImageCallBak imageCallBak;
@@ -35,6 +37,14 @@ public class ImageAsynLoader {
     private  int maxCache;
     //内存中的缓存区域
     private LruCache<String,Bitmap> cache;
+    private int width;//屏幕宽
+    private int height;//屏幕高
+
+    public ImageAsynLoader(int width,int height){
+        this.width=width;
+        this.height=height;
+        init();
+    }
 
     public ImageAsynLoader(){
         init();
@@ -63,11 +73,14 @@ public class ImageAsynLoader {
             @Override
             protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
                 super.entryRemoved(evicted, key, oldValue, newValue);
-                if(evicted && oldValue!=null){
-                    oldValue.recycle();//释放bitmap资源
-                }
+//                if(evicted && oldValue!=null){
+//                    oldValue.recycle();//释放bitmap资源
+//                }
             }
         };
+
+
+
     }
 
     private  Handler myHandler=new MyHandler();
@@ -88,6 +101,7 @@ public class ImageAsynLoader {
 
     /**
      * 获取bitmap
+     *
      */
     public Bitmap getBitmap(String url,ImageCallBak imagecallBak){
 
@@ -152,8 +166,25 @@ public class ImageAsynLoader {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod(ActivityConstant.GET);
                     conn.setConnectTimeout(5 * 1000);
+                    int contentLength=conn.getContentLength();
+                    String response=conn.getResponseMessage();
+                    Log.d(tag,"contentlength="+contentLength);
+                    Log.d(tag,"response="+response);
                     InputStream in = conn.getInputStream();
-                    bitmap=BitmapFactory.decodeStream(in);
+
+                    int beishu=calculateInSampleSize(in, 200, 200);
+                    Log.d(tag,"beishu="+beishu);
+                    BitmapFactory.Options options=new BitmapFactory.Options();
+                    options.inSampleSize=beishu;
+
+                    options.inJustDecodeBounds=false;
+                    HttpURLConnection conn1 = (HttpURLConnection) url.openConnection();//注意这里的搞法，哥们是重新练了一次网，重新获取in，只有这样才行
+                    conn1.setRequestMethod(ActivityConstant.GET);
+                    conn1.setConnectTimeout(5 * 1000);
+                    InputStream in1 = conn1.getInputStream();
+                    bitmap=BitmapFactory.decodeStream(in1,null,options);
+                    Log.d(tag,"bitmap大小="+bitmap.getByteCount());
+
 
                     Message message=Message.obtain();
                     message.what=UPDATE_IMAGE;
@@ -219,4 +250,63 @@ public class ImageAsynLoader {
     public interface ImageCallBak{
         public void refresh(Bitmap bitmap,String url);
     }
+
+    /**
+     * 计算压缩的比例
+     */
+    public int calculateInSampleSize(
+            InputStream in, int reqWidth, int reqHeight) {
+        BitmapFactory.Options options=new BitmapFactory.Options();
+        options.inJustDecodeBounds=true;
+        BitmapFactory.decodeStream(in,null,options);
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        Log.d(tag,"Height"+height);
+        Log.d(tag,"width"+width);
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+            inSampleSize=inSampleSize*2;
+        }
+
+        return inSampleSize;
+    }
+
+    /**
+     * 返回压缩后的bitmap
+     * @param reqWidth 压缩后需要的宽
+     * @param reqHeight 压缩后需要的高
+     */
+    public Bitmap decodeSampledBitmapFromStream(InputStream in,
+                                                         int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;//这个属性设置为true的时候，会将图片的宽高信息返回到options里面，但不返回bimap
+        BitmapFactory.decodeStream(in, null,options);
+
+
+        BitmapFactory.Options o2 = new BitmapFactory.Options();
+        // Calculate inSampleSize
+        o2.inSampleSize = 2;
+
+        // Decode bitmap with inSampleSize set
+
+        Log.d(tag,"reqWidth="+reqWidth);
+        Log.d(tag,"reqHeight"+reqHeight);
+        return BitmapFactory.decodeStream(in,null,null);
+    }
+
 }

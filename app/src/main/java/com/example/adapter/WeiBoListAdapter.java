@@ -1,6 +1,7 @@
 package com.example.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.text.SpannableString;
 import android.util.Log;
@@ -13,8 +14,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.Util.ImageAsynLoader;
-import com.example.Util.MyDateUtil;
 import com.example.Util.MyStringUtil;
+import com.example.asus_cp.activity.PicOperateActivity;
 import com.example.asus_cp.iweibo.R;
 import com.sina.weibo.sdk.openapi.legacy.StatusesAPI;
 import com.sina.weibo.sdk.openapi.models.Status;
@@ -24,7 +25,7 @@ import java.util.List;
 /**
  * Created by asus-cp on 2016-03-25.
  */
-public class WeiBoListAdapter extends BaseAdapter {
+public class WeiBoListAdapter extends BaseAdapter  {
     private String tag="WeiBoListAdapter";
     private Context context;
     private List<Status> statuses;
@@ -33,18 +34,23 @@ public class WeiBoListAdapter extends BaseAdapter {
     private ImageAsynLoader loader;
     private MyStringUtil myStringUtil;
     private StatusesAPI statusesAPI;
+    public static final String URL_KEY_MYLISTENER="urlKeyMylistener";
+    private int width;
+    private int height;
 
-    public WeiBoListAdapter(Context context, List<Status> statuses,StatusesAPI statusesAPI) {
+    public WeiBoListAdapter(Context context, List<Status> statuses,StatusesAPI statusesAPI,int width,int height) {
         this.context = context;
         this.statuses = statuses;
         this.statusesAPI=statusesAPI;
+        this.width=width;
+        this.height=height;
         for(int i=0;i<statuses.size();i++){
             statuses.get(i).text=statuses.get(i).text+"........."+i;
             statuses.get(i).user.screen_name=statuses.get(i).user.screen_name+"....."+i;
             Log.d(tag,"名称="+statuses.get(i).user.screen_name+".........."+"内容="+statuses.get(i).text);
         }
         inflater = LayoutInflater.from(context);
-        loader=new ImageAsynLoader();
+        loader=new ImageAsynLoader(width,height);
         myStringUtil=new MyStringUtil(statusesAPI);
 
     }
@@ -124,16 +130,21 @@ public class WeiBoListAdapter extends BaseAdapter {
         }else{
             viewHolder.imgListviewVCertification.setVisibility(View.GONE);
         }
-        viewHolder.textReleaseTime.setText(MyDateUtil.getFormatString(MyDateUtil.transformStringToDate(status.created_at)));
+
+        if(status.created_at!=null){
+//            viewHolder.textReleaseTime.setText(MyDateUtil.getFormatString(MyDateUtil.transformStringToDate(status.created_at)));
+        }
+
         //Log.d(tag, "发布时间=" + status.created_at);
         viewHolder.textFromWhere.setText(getSubString(status.source));
 
         SpannableString content=myStringUtil.setHuiZong(status.text);
         viewHolder.textWeiboContent.setText(content);//问题居然出在这句话上面
         //有配图
-        if(status.thumbnail_pic!=null && !status.thumbnail_pic.equals("")){ //注意所谓的不返回，其实返回的是""，
+        String peiturl=status.thumbnail_pic;
+        if(peiturl!=null && !peiturl.equals("")){ //注意所谓的不返回，其实返回的是""，
             viewHolder.imgContentPictrue.setVisibility(View.VISIBLE);
-            String peiturl=status.thumbnail_pic;
+            viewHolder.imgContentPictrue.setOnClickListener(new MyOnclickListener(status.original_pic));
             viewHolder.imgContentPictrue.setTag(peiturl);
             viewHolder.imgContentPictrue.setImageResource(R.mipmap.ic_launcher);
             Bitmap zwptBitmap=loader.getBitmap(peiturl, new ImageAsynLoader.ImageCallBak() {
@@ -162,6 +173,7 @@ public class WeiBoListAdapter extends BaseAdapter {
             String zfUrl=zf.thumbnail_pic;
             if(zfUrl!=null && !zfUrl.equals("")){ //注意这个判断的后半部分
                 viewHolder.imgZhuanfaPictrue.setVisibility(View.VISIBLE);
+                viewHolder.imgZhuanfaPictrue.setOnClickListener(new MyOnclickListener(status.original_pic));
                 viewHolder.imgZhuanfaPictrue.setTag(zfUrl);
                 viewHolder.imgZhuanfaPictrue.setImageResource(R.mipmap.ic_launcher);
                 Bitmap zfpeituBitmap=loader.getBitmap(zfUrl, new ImageAsynLoader.ImageCallBak() {
@@ -215,6 +227,24 @@ public class WeiBoListAdapter extends BaseAdapter {
         TextView textLike;
         ViewHolder() {
 
+        }
+    }
+
+    /**
+     * 自定义的监听器
+     */
+    class MyOnclickListener implements View.OnClickListener{
+
+        private String url;
+        MyOnclickListener(String url){
+            this.url=url;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent intent=new Intent(context, PicOperateActivity.class);
+            intent.putExtra(URL_KEY_MYLISTENER,url);
+            context.startActivity(intent);
         }
     }
 }
