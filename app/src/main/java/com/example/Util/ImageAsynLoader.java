@@ -172,7 +172,7 @@ public class ImageAsynLoader {
                     Log.d(tag,"response="+response);
                     InputStream in = conn.getInputStream();
 
-                    int beishu=calculateInSampleSize(in, 200, 200);
+                    int beishu=calculateInSampleSize(in, width, height);
                     Log.d(tag,"beishu="+beishu);
                     BitmapFactory.Options options=new BitmapFactory.Options();
                     options.inSampleSize=beishu;
@@ -278,7 +278,7 @@ public class ImageAsynLoader {
                     && (halfWidth / inSampleSize) > reqWidth) {
                 inSampleSize *= 2;
             }
-            inSampleSize=inSampleSize*2;
+
         }
 
         return inSampleSize;

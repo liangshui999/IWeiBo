@@ -40,6 +40,7 @@ public class MyStringUtil {
     public static final String START = "start";
     public static final String END = "end";
     public static final String PIPEI_CONTENT = "piPeiContent";
+    private String zfName="\\w*[\\u4e00-\\u9fa5]*\\w*[\\u4e00-\\u9fa5]*:";//转发名称
     private String topic="#.*#";//解析话题
     private String at="@\\w*[\\u4e00-\\u9fa5]*\\w*[\\u4e00-\\u9fa5]*";//只解析：中文，[a-zA-Z_0-9]
     private String emotionResolve ="\\[\\w*[\\u4e00-\\u9fa5]*\\w*[\\u4e00-\\u9fa5]*\\]";//解析表情
@@ -60,12 +61,16 @@ public class MyStringUtil {
     /**
      * 对传进来的string设置各种特效
      */
-    public SpannableString setHuiZong(String str) {
+    public SpannableString setHuiZong(String str,boolean isZhuanfa) {
         SpannableString spanString = new SpannableString(str);
         setTx(spanString,str,Pattern.compile(topic),false);//给话题设置特效
         setTx(spanString, str, Pattern.compile(at), false);//给@设置特效
         setTx(spanString, str, Pattern.compile(emotionResolve), true);//给表情设置特效
         setTx(spanString, str, Pattern.compile(urlResolve), false);//给url设置特效
+        if(isZhuanfa){
+            setTx(spanString, str, Pattern.compile(zfName), false);//给zf设置特效
+        }
+
         return spanString;
     }
 

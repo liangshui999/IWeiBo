@@ -3,11 +3,13 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp">
+    <!--
     <ImageView
         android:id="@+id/img_spin_user_head"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@mipmap/p1"/>
+        -->
     <TextView
         android:id="@+id/text_spin_user_name"
         android:layout_width="wrap_content"

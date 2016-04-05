@@ -54,25 +54,25 @@ public class UserSelectSpinnerAdapter extends BaseAdapter {
         TextView userNameTextView=null;
         if(convertView==null){
             convertView= LayoutInflater.from(context).inflate(R.layout.spinner_user_select_item,null);
-            userHeadImageView= (ImageView) convertView.findViewById(R.id.img_spin_user_head);
+            //userHeadImageView= (ImageView) convertView.findViewById(R.id.img_spin_user_head);
             userNameTextView= (TextView) convertView.findViewById(R.id.text_spin_user_name);
             viewHolder=new ViewHolder();
-            viewHolder.imageView=userHeadImageView;
+            //viewHolder.imageView=userHeadImageView;
             viewHolder.textView=userNameTextView;
             convertView.setTag(viewHolder);
         }else{
             viewHolder=(ViewHolder)convertView.getTag();
-            userHeadImageView=viewHolder.imageView;
+            //userHeadImageView=viewHolder.imageView;
             userNameTextView=viewHolder.textView;
         }
         Bitmap bitmap= FileUtil.getBitmapFromByteArray(userInfos.get(position).getUserImage());
-        userHeadImageView.setImageBitmap(bitmap);
+        //userHeadImageView.setImageBitmap(bitmap);
         userNameTextView.setText(userInfos.get(position).getUserName());
         return convertView;
     }
 
     public class ViewHolder{
-        private ImageView imageView;
+        //private ImageView imageView;
         private  TextView textView;
 
     }

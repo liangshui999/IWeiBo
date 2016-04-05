@@ -8,6 +8,6 @@ public interface AuthConstants {
     public static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";//回调页面
     public static final String SCOPE =null;//申请高级权限时需要
     public static final String USER_NAME="name";
-    public static final String USER_IMAGE_URL="profile_image_url";
+    public static final String USER_IMAGE_URL="avatar_large";
 
 }

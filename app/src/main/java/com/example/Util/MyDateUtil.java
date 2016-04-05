@@ -8,7 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.Locale;
 
 /**
  * Created by asus-cp on 2016-03-26.
@@ -21,15 +21,16 @@ public class MyDateUtil {
     public static Calendar transformStringToDate(String s){
          Calendar calendar=null;
         try {
+            Log.d(tag, "s=" + s);
             Context context=MyApplication.getContext();
             AlarmManager mAlarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-            mAlarmManager.setTimeZone("GMT+08:00");
-            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");//按给定模式进行解析
-            simpleDateFormat.setLenient(false);
-            simpleDateFormat.setTimeZone(TimeZone.getDefault());//用上海时区
+            //mAlarmManager.setTimeZone("GMT+08:00");
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US);//按给定模式进行解析
+            //simpleDateFormat.setLenient(true);//时间和日期的解释是否是宽松的
+            //simpleDateFormat.setTimeZone(TimeZone.getDefault());//用上海时区
+            Log.d(tag,simpleDateFormat.format(new Date()));
             Log.d(tag, "默认时区=" + simpleDateFormat.getTimeZone());
             Date date= simpleDateFormat.parse(s);
-            Log.d(tag,"s="+s);
             Log.d(tag,"date="+date);
             calendar=Calendar.getInstance();
             calendar.setTime(date);

@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.Util.ImageAsynLoader;
+import com.example.Util.MyDateUtil;
 import com.example.Util.MyStringUtil;
 import com.example.asus_cp.activity.PicOperateActivity;
 import com.example.asus_cp.iweibo.R;
@@ -44,14 +45,18 @@ public class WeiBoListAdapter extends BaseAdapter  {
         this.statusesAPI=statusesAPI;
         this.width=width;
         this.height=height;
-        for(int i=0;i<statuses.size();i++){
-            statuses.get(i).text=statuses.get(i).text+"........."+i;
-            statuses.get(i).user.screen_name=statuses.get(i).user.screen_name+"....."+i;
-            Log.d(tag,"名称="+statuses.get(i).user.screen_name+".........."+"内容="+statuses.get(i).text);
-        }
         inflater = LayoutInflater.from(context);
         loader=new ImageAsynLoader(width,height);
         myStringUtil=new MyStringUtil(statusesAPI);
+
+    }
+
+    public WeiBoListAdapter(Context context, List<Status> statuses,StatusesAPI statusesAPI){
+        this.context = context;
+        this.statuses = statuses;
+        this.statusesAPI=statusesAPI;
+        inflater = LayoutInflater.from(context);
+        loader=new ImageAsynLoader(width,height);
 
     }
 
@@ -132,13 +137,13 @@ public class WeiBoListAdapter extends BaseAdapter  {
         }
 
         if(status.created_at!=null){
-//            viewHolder.textReleaseTime.setText(MyDateUtil.getFormatString(MyDateUtil.transformStringToDate(status.created_at)));
+            viewHolder.textReleaseTime.setText(MyDateUtil.getFormatString(MyDateUtil.transformStringToDate(status.created_at)));
         }
 
-        //Log.d(tag, "发布时间=" + status.created_at);
+        Log.d(tag, "发布时间=" + status.created_at);
         viewHolder.textFromWhere.setText(getSubString(status.source));
 
-        SpannableString content=myStringUtil.setHuiZong(status.text);
+        SpannableString content=myStringUtil.setHuiZong(status.text,false);
         viewHolder.textWeiboContent.setText(content);//问题居然出在这句话上面
         //有配图
         String peiturl=status.thumbnail_pic;
@@ -167,13 +172,18 @@ public class WeiBoListAdapter extends BaseAdapter  {
         //有转发微博
         Status zf=status.retweeted_status;
         if(zf!=null){
+            SpannableString zfcontent=null;
+            if(zf.user!=null){
+                zfcontent=myStringUtil.setHuiZong(zf.user.screen_name+":"+zf.text,true);
+            }
             viewHolder.textZhuanfaContent.setVisibility(View.VISIBLE);
-            viewHolder.textZhuanfaContent.setText(zf.text);
+            viewHolder.textZhuanfaContent.setText(zfcontent);
             //转发有配图
             String zfUrl=zf.thumbnail_pic;
             if(zfUrl!=null && !zfUrl.equals("")){ //注意这个判断的后半部分
                 viewHolder.imgZhuanfaPictrue.setVisibility(View.VISIBLE);
-                viewHolder.imgZhuanfaPictrue.setOnClickListener(new MyOnclickListener(status.original_pic));
+                //转发配图的点击事件
+                viewHolder.imgZhuanfaPictrue.setOnClickListener(new MyOnclickListener(zf.original_pic));
                 viewHolder.imgZhuanfaPictrue.setTag(zfUrl);
                 viewHolder.imgZhuanfaPictrue.setImageResource(R.mipmap.ic_launcher);
                 Bitmap zfpeituBitmap=loader.getBitmap(zfUrl, new ImageAsynLoader.ImageCallBak() {
@@ -189,6 +199,7 @@ public class WeiBoListAdapter extends BaseAdapter  {
                 if(zfpeituBitmap!=null){
                     viewHolder.imgZhuanfaPictrue.setImageBitmap(zfpeituBitmap);
                 }
+
             }else{
                 viewHolder.imgZhuanfaPictrue.setVisibility(View.GONE);//因为哥们是复用的上面的，有可能上面正好有图，哥们这儿也跟着有了
             }
