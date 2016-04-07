@@ -278,7 +278,7 @@ public class ImageAsynLoader {
                     && (halfWidth / inSampleSize) > reqWidth) {
                 inSampleSize *= 2;
             }
-
+            //inSampleSize=inSampleSize*2;
         }
 
         return inSampleSize;

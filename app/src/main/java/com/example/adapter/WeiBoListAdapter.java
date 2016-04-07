@@ -98,6 +98,9 @@ public class WeiBoListAdapter extends BaseAdapter  {
             viewHolder.imgContentPictrue= (ImageView) v.findViewById(R.id.img_content_pictrue);
             viewHolder.textZhuanfaContent= (TextView) v.findViewById(R.id.text_zhuanfa_content);
             viewHolder.imgZhuanfaPictrue= (ImageView) v.findViewById(R.id.img_zhuanfa_pictrue);
+            viewHolder.textZhuanfa= (TextView) v.findViewById(R.id.text_zhuanfa);
+            viewHolder.textComments= (TextView) v.findViewById(R.id.text_comments);
+            viewHolder.textLike= (TextView) v.findViewById(R.id.text_like);
             v.setTag(viewHolder);
         }else{
             viewHolder=(ViewHolder)v.getTag();
@@ -208,6 +211,15 @@ public class WeiBoListAdapter extends BaseAdapter  {
             viewHolder.textZhuanfaContent.setVisibility(View.GONE);
             viewHolder.imgZhuanfaPictrue.setVisibility(View.GONE);
         }
+
+        //转发数目
+        viewHolder.textZhuanfa.setText(status.reposts_count+"");
+
+        //评论数目
+        viewHolder.textComments.setText(status.comments_count+"");
+
+        //点赞数目
+        viewHolder.textLike.setText(status.attitudes_count+"");
         return v;
 
     }

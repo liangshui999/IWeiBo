@@ -1,5 +1,7 @@
 package com.example.fragment;
 
+import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -40,6 +42,7 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
     private String tag="HomeFragment";
     private WeiBoListAdapter adapter;
     private PullToRefreshListView mListview;
+    private ProgressDialog progressDialog;//加载微博数据时，显示的正在加载的对话框
 
 
     @Nullable
@@ -63,6 +66,7 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
      */
     @Override
     public void init() {
+        showProgressDialog();
         statuses=new ArrayList<Status>();
         HomeActivity homeActivity= (HomeActivity) getActivity();//获取到和本碎片相关联的活动
         //获取屏幕宽和高
@@ -86,6 +90,7 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
                     adapter = new WeiBoListAdapter(getActivity(), statuses, statusesAPI, screenWidth, screenHeight);
                     mListview.setAdapter(adapter);//得数据返回来之后才设置adapter，而不是在oncreateView()里面设置
                     Log.d(tag, "size=" + statuses.size());
+                    progressDialog.dismiss();
                 } catch (JSONException e) {
                     Log.d(tag, "发生了异常");
                     e.printStackTrace();
@@ -99,6 +104,20 @@ public class HomeFragment extends android.support.v4.app.Fragment implements IWe
 
             }
         });
+    }
+
+    /**
+     * 显示正在加载的progressDialog
+     */
+    public void showProgressDialog(){
+        progressDialog= ProgressDialog.show(getActivity(), "", "正在加载...");
+        progressDialog.setCancelable(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.mipmap.progress,null));
+        }else{
+            progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.mipmap.progress));
+        }
+        progressDialog.show();
     }
 
     /**

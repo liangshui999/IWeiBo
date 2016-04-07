@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +38,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+/**
+ * 登录界面的activity
+ */
 public class LoginActivity extends Activity  implements IWeiBoActivity{
     private AuthInfo authInfo;
     private SsoHandler ssoHandler;
@@ -43,9 +48,10 @@ public class LoginActivity extends Activity  implements IWeiBoActivity{
     private String tag="LoginActivity";
     private AlertDialog authDialog;//授权对话框
     private List<UserInfo>userInfos;//从数据库中查询到的用户信息集合
-    private UserInfo userInfo;//用户从数据库中选中的某项的用户信息,当为空的时候，说明没选择
+    private UserInfo userInfo;//用户从下拉列表中选中的某项的用户信息,当为空的时候，说明没选择
     private UserSelectSpinnerAdapter adapter;
     private UserInfoManager manager;
+
     @Bind(R.id.btn_add_account)
     Button btnAddAccount;
     @Bind(R.id.img_user_head) ImageView imgUserHead;
@@ -70,17 +76,33 @@ public class LoginActivity extends Activity  implements IWeiBoActivity{
         if(userInfo==null){
             Toast.makeText(this,"请选择一个用户",Toast.LENGTH_LONG).show();
         }else{
-            Log.d(tag,userInfo.getAuthTime()+"");
-            Log.d(tag,userInfo.getExpiresIn()+"");
-            Bundle bundle=new Bundle();
-            bundle.putParcelable(ActivityConstant.USER_INFO_KEY,userInfo);
-            Intent intent=new Intent(this,HomeActivity.class);
-            intent.putExtras(bundle);
-            startActivity(intent);
+            if(isHaveNet()){
+                Log.d(tag,userInfo.getAuthTime()+"");
+                Log.d(tag,userInfo.getExpiresIn()+"");
+                Bundle bundle=new Bundle();
+                bundle.putParcelable(ActivityConstant.USER_INFO_KEY,userInfo);
+                Intent intent=new Intent(this,HomeActivity.class);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }else{
+                Toast.makeText(this,"网络不可用",Toast.LENGTH_LONG).show();
+            }
+
         }
-
-
     }
+
+    /**
+     * 判断手机是否处于联网状态,有返回true，没有返回false
+     */
+    public boolean isHaveNet(){
+        ConnectivityManager connectivityManager= (ConnectivityManager) this.getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo=connectivityManager.getActiveNetworkInfo();
+        if(networkInfo!=null && networkInfo.isConnected()){
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * 添加账户的点击事件
