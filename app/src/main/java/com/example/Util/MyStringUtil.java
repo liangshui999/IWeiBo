@@ -1,13 +1,19 @@
 package com.example.Util;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
+import android.view.View;
 
+import com.example.asus_cp.activity.PersonalHomePageActivity;
+import com.example.asus_cp.activity.WebActivity;
 import com.sina.weibo.sdk.exception.WeiboException;
 import com.sina.weibo.sdk.net.RequestListener;
 import com.sina.weibo.sdk.openapi.legacy.StatusesAPI;
@@ -40,48 +46,68 @@ public class MyStringUtil {
     public static final String START = "start";
     public static final String END = "end";
     public static final String PIPEI_CONTENT = "piPeiContent";
-    private String zfName="\\w*[\\u4e00-\\u9fa5]*\\w*[\\u4e00-\\u9fa5]*:";//转发名称
+    private String zfName="\\w*[\\u4e00-\\u9fa5]*\\w*[\\u4e00-\\u9fa5]*\\s:";//转发名称
     private String topic="#.*#";//解析话题
     private String at="@\\w*[\\u4e00-\\u9fa5]*\\w*[\\u4e00-\\u9fa5]*";//只解析：中文，[a-zA-Z_0-9]
     private String emotionResolve ="\\[\\w*[\\u4e00-\\u9fa5]*\\w*[\\u4e00-\\u9fa5]*\\]";//解析表情
-    private String urlResolve="http://.*";
+    private String urlResolve="(http|https|ftp)\\://([a-zA-Z0-9\\.\\-]+(\\:[a-zA-"
+              + "Z0-9\\.&%\\$\\-]+)*@)?((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{"
+                       + "2}|[1-9]{1}[0-9]{1}|[1-9])\\.(25[0-5]|2[0-4][0-9]|[0-1]{1}"
+                       + "[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|"
+                       + "[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\\.(25[0-5]|2[0-"
+                       + "4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|([a-zA-Z0"
+                       + "-9\\-]+\\.)*[a-zA-Z0-9\\-]+\\.[a-zA-Z]{2,4})(\\:[0-9]+)?(/"
+                       + "[^/][a-zA-Z0-9\\.\\,\\?\\'\\\\/\\+&%\\$\\=~_\\-@]*)*$";
+
     private Map<String,String>emotions;//存放表情名称和表情url的集合，名称是键，url是值
     private boolean isCompleteSaveToHashmap=false;//是否已经将表情的数据缓存到hashmap里面
     private ImageAsynLoader loader;
     private StatusesAPI statusesAPI;
+
+    public static final int TOPIC=1;//话题的标记
+    public static final int AT=2;
+    public static final int EMOTION=3;
+    public static final int URL=4;
+    public static final int ZF_NAME=5;
+
+    private Context context;
+
+    public static final String URL_KEY="urlKey";//传送url到webview里面时的key
+
 
 
     public MyStringUtil(StatusesAPI statusesAPI){
         emotions=new HashMap<String,String>();
         loader=new ImageAsynLoader();
         this.statusesAPI=statusesAPI;
-        getAndSaveEmotions();
+        getAndSaveEmotions();//获取表情的数据
+        context=MyApplication.getContext();
     }
+
+
 
     /**
      * 对传进来的string设置各种特效
      */
-    public SpannableString setHuiZong(String str,boolean isZhuanfa) {
-        SpannableString spanString = new SpannableString(str);
-        setTx(spanString,str,Pattern.compile(topic),false);//给话题设置特效
-        setTx(spanString, str, Pattern.compile(at), false);//给@设置特效
-        setTx(spanString, str, Pattern.compile(emotionResolve), true);//给表情设置特效
-        setTx(spanString, str, Pattern.compile(urlResolve), false);//给url设置特效
-        if(isZhuanfa){
-            setTx(spanString, str, Pattern.compile(zfName), false);//给zf设置特效
-        }
-
+    public SpannableString setHuiZong(String str) {
+        final SpannableString spanString = new SpannableString(str);
+        setTx(spanString,str,Pattern.compile(topic),TOPIC);//给话题设置特效
+        setTx(spanString,str,Pattern.compile(at), AT);//给@设置特效
+        setTx(spanString,str, Pattern.compile(emotionResolve), EMOTION);//给表情设置特效
+        setTx(spanString,str, Pattern.compile(urlResolve), URL);//给url设置特效
+        setTx(spanString, str, Pattern.compile(zfName), ZF_NAME);//给zf设置特效
         return spanString;
+
     }
 
     /**
      * 查找需要设置特效的地方的开始的位置和结束的位置，比如：#联通春交会#，[大笑]
      */
-    public List<Map<String, String>> getPostion(String str, Pattern pattern, boolean isFace) {
+    public List<Map<String, String>> getPostion(String str, Pattern pattern) {
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
         Matcher matcher = pattern.matcher(str);
         Map<String, String> map = null;
-        if (isFace) {     //是表情
+//        if (flag==EMOTION) {     //是表情
             while (matcher.find()) {
                 map = new HashMap<String, String>();
                 map.put(START, matcher.start() + "");
@@ -90,7 +116,7 @@ public class MyStringUtil {
                // Log.d(tag, "是表情"+"start=" + matcher.start() + "....." + "end=" + matcher.end()+"名字="+matcher.group());
                 list.add(map);
             }
-        } else {      //不是表情
+         /*else {      //不是表情
             while (matcher.find()) {
                 map = new HashMap<String, String>();
                 map.put(START, matcher.start() + "");
@@ -98,50 +124,106 @@ public class MyStringUtil {
                // Log.d(tag,"不是表情"+"start="+matcher.start()+"........"+"end="+matcher.end());
                 list.add(map);
             }
-        }
+        }*/
        // Log.d(tag, "得到的list长度=" + list.size());
         return list;
     }
     /**
      * 设置特效的方法
      */
-    public void setTx(final SpannableString spanString,String str,Pattern pattern,boolean isFace){
-        List<Map<String, String>> positon=getPostion(str,pattern,isFace);
-       // Log.d(tag, "得到的position长度=" + positon.size());
-        if(positon!=null){
-            if(isFace){
-                for(Map<String, String>map:positon){
-                    final int start=Integer.parseInt(map.get(START));
-                    final int end=Integer.parseInt(map.get(END));
-                    String emotinName=map.get(PIPEI_CONTENT);
-                    if(isCompleteSaveToHashmap){
-                        String url=emotions.get(emotinName);
-                        Bitmap bitmap=loader.getBitmap(url, new ImageAsynLoader.ImageCallBak() {
-                            @Override
-                            public void refresh(Bitmap bitmap, String url) {
-                                if(bitmap!=null){
-                                    spanString.setSpan(new ImageSpan(MyApplication.getContext(),bitmap),
-                                            start,end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                }
-                            }
-                        });
-                        if(bitmap!=null){
-                            spanString.setSpan(new ImageSpan(MyApplication.getContext(),bitmap),
-                                    start,end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        }
+    public SpannableString setTx(final SpannableString spanString,String str,Pattern pattern,int flag){
+
+        List<Map<String, String>> positons=getPostion(str,pattern);
+       // Log.d(tag, "得到的position长度=" + positons.size());
+        if(positons!=null){
+            switch(flag){
+                case TOPIC:
+                    for(Map<String, String>map:positons){
+                        int start=Integer.parseInt(map.get(START));
+                        int end=Integer.parseInt(map.get(END));
+                        spanString.setSpan(new ForegroundColorSpan(Color.GREEN),start,end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
+                    break;
+                case AT:
+                    for(Map<String, String>map:positons){
+                        int start=Integer.parseInt(map.get(START));
+                        int end=Integer.parseInt(map.get(END));
+                        spanString.setSpan(new ForegroundColorSpan(Color.GREEN),start,end,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        spanString.setSpan(new ClickableSpan() {
+                            @Override
+                            public void onClick(View widget) {
+                                Intent intent=new Intent(context, PersonalHomePageActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//在非acitivty中启动，必须设置这个选项
+                                context.startActivity(intent);//用隐式意图开启活动
 
-                }
+                            }
+                        },start,end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                    break;
+                case EMOTION:
+                    for(Map<String, String>map:positons){
+                        final int start=Integer.parseInt(map.get(START));
+                        final int end=Integer.parseInt(map.get(END));
+                        String emotinName=map.get(PIPEI_CONTENT);
+                        if(isCompleteSaveToHashmap){
+                            String url=emotions.get(emotinName);
+                            Bitmap bitmap=loader.getBitmap(url, new ImageAsynLoader.ImageCallBak() {
+                                @Override
+                                public void refresh(Bitmap bitmap, String url) {
+                                    if(bitmap!=null){
+                                        spanString.setSpan(new ImageSpan(MyApplication.getContext(),bitmap),
+                                                start,end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                }
+                            });
+                            if(bitmap!=null){
+                                spanString.setSpan(new ImageSpan(MyApplication.getContext(),bitmap),
+                                        start,end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+                        }
 
-            }else{
-                for(Map<String, String>map:positon){
-                    int start=Integer.parseInt(map.get(START));
-                    int end=Integer.parseInt(map.get(END));
-                    spanString.setSpan(new ForegroundColorSpan(Color.GREEN),start,end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
+                    }
+                    break;
+                case URL:
+                    for(Map<String, String>map:positons){
+                        int start=Integer.parseInt(map.get(START));
+                        int end=Integer.parseInt(map.get(END));
+                        final String url=map.get(PIPEI_CONTENT);
+                        spanString.setSpan(new ForegroundColorSpan(Color.RED),start,end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        spanString.setSpan(new ClickableSpan() {
+                            @Override
+                            public void onClick(View widget) {
+                                Intent intent=new Intent(context, WebActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//在非acitivty中启动，必须设置这个选项
+                                intent.putExtra(URL_KEY,url);
+                                context.startActivity(intent);
+                            }
+                        },start,end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                    break;
+                case ZF_NAME:
+                    for(Map<String, String>map:positons){
+                        int start=Integer.parseInt(map.get(START));
+                        int end=Integer.parseInt(map.get(END));
+                        spanString.setSpan(new ForegroundColorSpan(Color.BLUE),start,end,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        spanString.setSpan(new ClickableSpan() {
+                            @Override
+                            public void onClick(View widget) {
+                                Intent intent=new Intent(context, PersonalHomePageActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//在非acitivty中启动，必须设置这个选项
+                                context.startActivity(intent);//用隐式意图开启活动
+
+                            }
+                        },start,end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                    break;
+
             }
 
         }
+        return spanString;
     }
     /**
      * 获取所有的微博表情，并存放到emotios里面(这个是多此一举了，可以废弃掉了)

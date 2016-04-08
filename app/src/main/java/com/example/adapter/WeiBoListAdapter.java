@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -146,8 +147,9 @@ public class WeiBoListAdapter extends BaseAdapter  {
         Log.d(tag, "发布时间=" + status.created_at);
         viewHolder.textFromWhere.setText(getSubString(status.source));
 
-        SpannableString content=myStringUtil.setHuiZong(status.text,false);
-        viewHolder.textWeiboContent.setText(content);//问题居然出在这句话上面
+
+        viewHolder.textWeiboContent.setText(myStringUtil.setHuiZong(status.text));//设置微博正文内容
+        viewHolder.textWeiboContent.setMovementMethod(LinkMovementMethod.getInstance());//要想有动作，必须设置这个
         //有配图
         String peiturl=status.thumbnail_pic;
         if(peiturl!=null && !peiturl.equals("")){ //注意所谓的不返回，其实返回的是""，
@@ -177,10 +179,11 @@ public class WeiBoListAdapter extends BaseAdapter  {
         if(zf!=null){
             SpannableString zfcontent=null;
             if(zf.user!=null){
-                zfcontent=myStringUtil.setHuiZong(zf.user.screen_name+":"+zf.text,true);
+                zfcontent=myStringUtil.setHuiZong(zf.user.screen_name+" :"+zf.text);
             }
             viewHolder.textZhuanfaContent.setVisibility(View.VISIBLE);
             viewHolder.textZhuanfaContent.setText(zfcontent);
+            viewHolder.textZhuanfaContent.setMovementMethod(LinkMovementMethod.getInstance());//要想有动作，必须设置这个
             //转发有配图
             String zfUrl=zf.thumbnail_pic;
             if(zfUrl!=null && !zfUrl.equals("")){ //注意这个判断的后半部分
@@ -270,4 +273,6 @@ public class WeiBoListAdapter extends BaseAdapter  {
             context.startActivity(intent);
         }
     }
+
+
 }
