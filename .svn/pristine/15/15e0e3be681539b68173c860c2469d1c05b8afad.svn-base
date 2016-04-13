@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/btn_auth_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/auth_button"/>
+        <Button
+            android:id="@+id/btn_dayin_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dayinceshi"/>
+        <Button
+            android:id="@+id/btn_slepp_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sleepceshi"/>
+        <Button
+            android:id="@+id/btn_sqlit_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sqlite_test"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btn_update_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/update_test"/>
+        <Button
+            android:id="@+id/btn_delete_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/delete_test"/>
+        <Button
+            android:id="@+id/btn_query_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/query_test"/>
+        <Button
+            android:id="@+id/btn_query_all_ceshi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/query_all_test"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/btn_add_ceshi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_test"/>
+    <ImageView
+        android:id="@+id/img_ceshi_slite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

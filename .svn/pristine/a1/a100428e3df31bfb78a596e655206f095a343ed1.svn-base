@@ -1,0 +1,59 @@
+package com.example.Util;
+
+import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+/**
+ * Created by asus-cp on 2016-03-22.
+ */
+public class HttpDownLoader {
+    private static String tag="HttpDownLoader";
+    public static String GET="GET";
+    public static byte[] download(final URL url){
+        final ByteArrayOutputStream out=new ByteArrayOutputStream();
+        final InputStream[] in = {null};
+        final HttpURLConnection[] conn = {null};
+        try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        conn[0] =(HttpURLConnection)url.openConnection();
+                        Log.d(tag, conn[0].toString());
+                        conn[0].setRequestMethod(GET);
+                        conn[0].setConnectTimeout(10 * 000);
+                        in[0] = conn[0].getInputStream();
+                        Log.d(tag, in[0].toString());
+                        Log.d(tag,"执行到这儿了吗");
+                        int len=0;
+                        byte[] buf=new byte[1024];
+                        while((len= in[0].read(buf))!=-1){
+                            out.write(buf,0,len);
+                            out.flush();
+                            Log.d(tag, "循环中");
+                        }
+                    }catch (Exception e){
+
+                    }
+
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            conn[0].disconnect();
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return out.toByteArray();
+    }
+}

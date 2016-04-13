@@ -1,0 +1,9 @@
+package com.example.wbinterfase;
+
+/**
+ * Created by asus-cp on 2016-03-20.
+ */
+public interface IWeiBoActivity {
+    public void init();
+    public void refresh(Object object);
+}

@@ -1,0 +1,15 @@
+package com.example.contants;
+
+/**
+ * Created by asus-cp on 2016-03-19.
+ */
+public interface ActivityConstant {
+    public static final String TASK="task";
+    public static final String URL="url";
+    public static final String BAIDU="http://www.baidu.com";
+    public static final String OUT_TIME="outtime";
+    public static final String CURRENT_TIME="currenttime";
+    public static final String MSG_USER_NAME="msgUserName";
+    public static final String MSG_USER_IMAGE="msgUserImage";
+
+}

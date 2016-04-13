@@ -1,0 +1,28 @@
+package com.example.contants;
+
+/**
+ * Created by asus-cp on 2016-03-19.
+ */
+public interface ActivityConstant {
+    public static final String TASK="task";
+    public static final String URL="url";
+    public static final String BAIDU="http://www.baidu.com";
+    public static final String OUT_TIME="outtime";
+    public static final String CURRENT_TIME="currenttime";
+    public static final String MSG_USER_NAME="msgUserName";
+    public static final String MSG_USER_IMAGE="msgUserImage";
+    public static final String TEMP_FILE_NAME="1.jpg";
+    public static final String HOME_TAG="homeTag";
+    public static final String SCQURE_TAG ="atTag";
+    public static final String MSG_TAG="msgTag";
+    public static final String ME_TAG="meTag";
+    public static final String MORE_TAG="moreTag";
+    public static final String HOME_VALUE="首页";
+    public static final String SCQURE_VALUE ="附近";
+    public static final String MSG_VALUE="消息";
+    public static final String ME_VALUE="我";
+    public static final String MORE_VALUE="更多";
+    public static final String ZHUAN_FA="转发微博";
+
+
+}

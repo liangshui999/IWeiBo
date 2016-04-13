@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<alpha xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fromAlpha="@string/logo_from_alpha"
+    android:toAlpha="@string/logo_to_alpha"
+    android:duration="@string/logo_duration_alpha"
+    android:fillAfter="true">
+</alpha>

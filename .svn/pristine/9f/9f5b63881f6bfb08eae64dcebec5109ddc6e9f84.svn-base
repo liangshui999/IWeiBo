@@ -1,0 +1,11 @@
+package com.example.db;
+
+import android.database.Cursor;
+
+/**
+ * 处理cursor返回结果
+ * Created by asus-cp on 2016-03-21.
+ */
+public interface HandleCursor {
+    public Object handleCursor(Cursor cursor);
+}

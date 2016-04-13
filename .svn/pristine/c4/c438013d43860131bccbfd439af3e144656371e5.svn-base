@@ -1,0 +1,134 @@
+package com.example.adapter;
+
+import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.example.Util.MyDateUtil;
+import com.example.asus_cp.iweibo.R;
+import com.example.contants.ActivityConstant;
+import com.sina.weibo.sdk.openapi.models.Status;
+
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
+/**
+ * Created by asus-cp on 2016-03-25.
+ */
+public class WeiBoListAdapter extends BaseAdapter {
+    private String tag="WeiBoListAdapter";
+    private Context context;
+    private List<Status> statuses;
+    private LayoutInflater inflater;
+
+    public WeiBoListAdapter(Context context, List<Status> statuses) {
+        this.context = context;
+        this.statuses = statuses;
+        inflater = LayoutInflater.from(context);
+    }
+
+    public WeiBoListAdapter() {
+
+    }
+
+    @Override
+    public int getCount() {
+        return statuses.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return statuses.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v = convertView;
+        ViewHolder viewHolder=null;
+        if (v == null) {
+            v = inflater.inflate(R.layout.item_home_listview_layout, null);
+            viewHolder=new ViewHolder(v);
+            v.setTag(viewHolder);
+        }else{
+            viewHolder=(ViewHolder)v.getTag();
+        }
+        Status status=statuses.get(position);
+        viewHolder.imgListviewUserHead.setImageResource(R.mipmap.p1);//用户头像，异步加载才行
+        viewHolder.textListviewUserName.setText(status.user.screen_name);
+        //判断是否是加v用户
+        if(status.user.verified){
+            viewHolder.imgListviewVCertification.setImageResource(R.mipmap.v);
+        }
+        viewHolder.textReleaseTime.setText(MyDateUtil.getFormatString(MyDateUtil.transformStringToDate(status.created_at)));
+        Log.d(tag, "发布时间=" + status.created_at);
+        viewHolder.textFromWhere.setText(status.source);
+        //判断是否是转发微博
+        if(status.retweeted_status==null){
+            viewHolder.textWeiboContent.setText(status.text);
+            //判断是否有配图
+            if(status.pic_urls==null||status.pic_urls.isEmpty()){
+
+            }else{
+                viewHolder.imgContentPictrue.setVisibility(View.VISIBLE);
+                viewHolder.imgContentPictrue.setImageResource(R.mipmap.p1);//这个也需要异步获取
+            }
+        }else{
+            viewHolder.textWeiboContent.setText(ActivityConstant.ZHUAN_FA);
+            Status zf=status.retweeted_status;
+            viewHolder.textZhuanfaContent.setVisibility(View.VISIBLE);
+            viewHolder.textZhuanfaContent.setText(zf.text);
+            //判断转发是否有配图
+            if(zf.pic_urls==null||zf.pic_urls.isEmpty()){
+
+            }else{
+                viewHolder.imgZhuanfaPictrue.setVisibility(View.VISIBLE);
+                viewHolder.imgZhuanfaPictrue.setImageResource(R.mipmap.p1);//这个也需要异步获取
+            }
+        }
+        return v;
+
+    }
+
+    static class ViewHolder {
+        @Bind(R.id.img_listview_user_head)
+        ImageView imgListviewUserHead;
+        @Bind(R.id.text_listview_userName)
+        TextView textListviewUserName;
+        @Bind(R.id.img_listview_v_certification)
+        ImageView imgListviewVCertification;
+        @Bind(R.id.text_release_time)
+        TextView textReleaseTime;
+        @Bind(R.id.text_from_where)
+        TextView textFromWhere;
+        @Bind(R.id.text_weibo_content)
+        TextView textWeiboContent;
+        @Bind(R.id.img_content_pictrue)
+        ImageView imgContentPictrue;
+        @Bind(R.id.text_zhuanfa_content)
+        TextView textZhuanfaContent;
+        @Bind(R.id.img_zhuanfa_pictrue)
+        ImageView imgZhuanfaPictrue;
+        @Bind(R.id.text_zhuanfa)
+        TextView textZhuanfa;
+        @Bind(R.id.text_comments)
+        TextView textComments;
+        @Bind(R.id.text_like)
+        TextView textLike;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+}

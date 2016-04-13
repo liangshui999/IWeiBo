@@ -1,0 +1,87 @@
+package com.example.modle;
+
+/**
+ * 用户信息的实体类
+ * Created by asus-cp on 2016-03-21.
+ */
+public class UserInfo {
+    private String userId;
+    private String userName;
+    private byte[] userImage;
+    private String accessToken;
+    private String refreshToken;
+    private long authTime;//授权时间
+    private long expiresIn;//授权的有效期
+
+    public UserInfo(String userId, String userName, byte[] userImage,
+                    String accessToken, String refreshToken, long authTime,
+                    long expiresIn) {
+        this.userId = userId;
+        this.userName = userName;
+        this.userImage = userImage;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.authTime = authTime;
+        this.expiresIn = expiresIn;
+    }
+
+    public UserInfo() {
+
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public byte[] getUserImage() {
+        return userImage;
+    }
+
+    public void setUserImage(byte[] userImage) {
+        this.userImage = userImage;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public long getAuthTime() {
+        return authTime;
+    }
+
+    public void setAuthTime(long authTime) {
+        this.authTime = authTime;
+    }
+
+    public long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(long expiresIn) {
+        this.expiresIn = expiresIn;
+    }
+}

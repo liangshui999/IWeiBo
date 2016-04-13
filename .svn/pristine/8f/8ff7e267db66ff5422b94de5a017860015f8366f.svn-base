@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">IWeiBo</string>
+    <string name="action_settings">Settings</string>
+    <string name="auth_button">授权测试</string>
+    <string name="dayinceshi">打印测试</string>
+    <string name="sleepceshi">睡觉测试</string>
+    <string name="logo_from_alpha">0</string>
+    <string name="logo_to_alpha">1.0</string>
+    <string name="logo_duration_alpha">5000</string>
+    <string name="login_button">登 录</string>
+    <string name="auth_prompt">授权提示</string>
+    <string name="auth_prompt_content">此处需要您的授权，点击开始按钮开始授权</string>
+    <string name="sqlite_test">创建数据库测试</string>
+    <string name="add_test">添加测试</string>
+    <string name="delete_test">删除测试</string>
+    <string name="update_test">更新测试</string>
+    <string name="query_test">查询测试</string>
+    <string name="query_all_test">查询所有测试</string>
+    <string name="home">主页</string>
+    <string name="at">提及</string>
+    <string name="msg">消息</string>
+    <string name="more">更多</string>
+</resources>

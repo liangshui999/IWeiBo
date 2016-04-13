@@ -1,0 +1,210 @@
+package com.example.Util;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
+import android.util.LruCache;
+import android.widget.ImageView;
+
+import com.example.contants.ActivityConstant;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * 异步加载图片的类，先从缓存中寻找，再从文件系统中寻找，都找不到就从网络下载
+ * Created by asus-cp on 2016-03-27.
+ */
+public class ImageAsynLoader {
+    public static ImageView imageView;
+    private static String urlQj;
+    public static final int UPDATE_IMAGE=0;//更新imagview
+    private static Context context=MyApplication.getContext();
+    private static ExecutorService executorService= Executors.newCachedThreadPool();//新建一个可缓存线程池
+    private static int maxMemory= (int) (Runtime.getRuntime().maxMemory()/1024);//当前应用程序所用使用的最大内存
+    private static int maxCache=maxMemory/8;
+    //内存中的缓存区域
+    private static LruCache<String,Bitmap> cache=new LruCache<String,Bitmap>(maxCache){
+        @Override
+        protected int sizeOf(String key, Bitmap value) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {  //API 19
+                return value.getAllocationByteCount()/1024;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1)  //API 12
+
+            {
+                return value.getByteCount()/1024;
+            }
+            return value.getRowBytes() * value.getHeight()/1024;
+
+        }
+        //默认的实现是一个空方法，我的实现：当内存达到设定的最大值时，清理内存
+        @Override
+        protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+            super.entryRemoved(evicted, key, oldValue, newValue);
+            if(evicted && oldValue!=null){
+                oldValue.recycle();//释放bitmap资源
+            }
+        }
+    };
+
+    private static Handler myHandler=new MyHandler();
+
+    static class MyHandler extends Handler{
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case UPDATE_IMAGE:
+                    Bitmap bitmap= (Bitmap) msg.obj;
+                    if(imageView.getTag().equals(urlQj)){
+                        imageView.setImageBitmap(bitmap);
+                    }
+
+                    break;
+            }
+        }
+    }
+
+
+
+
+
+    /**
+     * 获取bitmap
+     */
+    public static void getBitmap(String url,ImageView imageView1){
+        urlQj=url;
+        imageView=imageView1;
+        Bitmap bitmap=null;
+        bitmap=getBitmapFromCache(url);
+        if(bitmap!=null){
+            imageView1.setImageBitmap(bitmap);
+        }else{
+            bitmap=getBitmapFromFile(url);
+            if(bitmap!=null){
+                if(imageView1.getTag().equals(url)){
+                    imageView1.setImageBitmap(bitmap);
+                }
+
+            }else{
+                getBitmapFromInternet(url);//这个会开新线程去下载，无法返回
+
+            }
+        }
+    }
+
+
+    /**
+     * 从内存中读取birmap
+     */
+    public static Bitmap getBitmapFromCache(String url){
+        return cache.get(url);
+    }
+    /**
+     * 从本地文件系统中获取bitmap
+     */
+    public static Bitmap getBitmapFromFile(String url){
+        String fileName=transformUrl(url);
+        InputStream in=null;
+        Bitmap bitmap=null;
+        try {
+            in=context.openFileInput(fileName);
+            bitmap= BitmapFactory.decodeStream(in);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            if(in!=null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return bitmap;
+    }
+    /**
+     * 从网络获取bitmap
+     */
+    public static void getBitmapFromInternet(final String urlString){
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection conn=null;
+                URL url = null;
+                Bitmap bitmap=null;
+                try {
+                    url = new URL(urlString);
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod(ActivityConstant.GET);
+                    conn.setConnectTimeout(5 * 1000);
+                    InputStream in = conn.getInputStream();
+                    bitmap=BitmapFactory.decodeStream(in);
+                    //将bitmap存入缓存
+                    cache.put(urlString,bitmap);
+                    saveBitmapToFile(urlString, bitmap);//将bitmap存入文件
+                    Message message=Message.obtain();
+                    message.what=UPDATE_IMAGE;
+                    message.obj=bitmap;
+                    myHandler.sendMessage(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }finally {
+                    if(conn!=null){
+                        conn.disconnect();
+                    }
+                }
+
+                }
+            });
+
+
+
+
+    }
+    /**
+     * 把url中所有的/符号替换成a，http://www.baidu.com替换成http:aawww.baidu.com
+     */
+    public static String transformUrl(String s){
+        return s.replaceAll("/","a");
+    }
+
+    /**
+     * 将bitmap存入文件
+     */
+    public static void saveBitmapToFile(String url,Bitmap bitmap){
+        FileOutputStream out=null;
+        String fileName=transformUrl(url);
+        try {
+            out=context.openFileOutput(fileName,Context.MODE_PRIVATE);
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,out);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if(out!=null){
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    /**
+     * 回调接口
+     */
+    public interface ImageCallBak{
+        public void refresh(Bitmap bitmap);
+    }
+}

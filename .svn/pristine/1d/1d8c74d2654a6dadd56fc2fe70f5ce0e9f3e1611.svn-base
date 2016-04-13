@@ -1,0 +1,132 @@
+package com.example.service;
+
+import android.app.Activity;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.example.asus_cp.activity.WBAuthActivity;
+import com.example.contants.ActivityConstant;
+import com.example.modle.Task;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by asus-cp on 2016-03-19.
+ * 主服务类，活动向他发送任务和活动本身，他接收任务并处理，处理完成后刷新界面
+ */
+public class MainService extends Service implements Runnable {
+    private String tag="MainService";
+    private Task task;
+    private static List<Activity>activities=new ArrayList<Activity>();
+    private MyHandler myHandler;
+    /**
+     * 这里使用静态内部类，静态内部类不会保持对外部内的引用
+     */
+    private  class MyHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case Task.SLEEP:
+                    Bundle bundle=msg.getData();
+                    String name=bundle.getString(ActivityConstant.URL);
+                    WBAuthActivity activity= (WBAuthActivity) getActivityByName("com.example.asus_cp.activity.WBAuthActivity");
+                    activity.refresh(name);
+                    break;
+            }
+        }
+    }
+
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        myHandler=new MyHandler();
+
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        task=intent.getParcelableExtra(ActivityConstant.TASK);
+        new Thread(this).start();
+        return START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public void run() {
+        doTask(task);
+
+    }
+
+
+
+    /**
+     * 任务的具体执行
+     */
+    public void doTask(Task task1)  {
+        switch (task1.getTaskId()){
+            case Task.DAYIN:
+                for(int i=0;i<100000;i++){
+                    Log.d(tag,"i="+i+Thread.currentThread().getName());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            case Task.SLEEP:
+                Bundle bundle=task1.getTaskParams();
+                String url=bundle.getString(ActivityConstant.URL);
+                int time=bundle.getInt(ActivityConstant.OUT_TIME);
+                Log.d(tag,"url="+url);
+                Log.d(tag, "time=" + time);
+                Message message=Message.obtain();
+                message.what=Task.SLEEP;
+                message.setData(bundle);
+                myHandler.sendMessage(message);
+                break;
+        }
+
+    }
+
+    /**
+     * 添加活动到集合
+     */
+    public static void addActivity(Activity activity){
+        activities.add(activity);
+
+    }
+
+    /**
+     * 根据名字查找集合中的活动
+     */
+    public  Activity getActivityByName(String name){
+        Activity mActivity=null;
+        for(Activity activity:activities){
+            Log.d(tag,activity.getClass().getName());
+            if(name.equals(activity.getClass().getName())){
+                mActivity=activity;
+            }
+        }
+        return  mActivity;
+    }
+
+
+
+
+}
